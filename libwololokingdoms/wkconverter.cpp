@@ -25,7 +25,6 @@
 #include "fixes/smallfixes.h"
 #include "fixes/splituniquetechicons.h"
 #include "fixes/tricklebuildingfix.h"
-#include "fixes/uprootingfix.h"
 #include "fixes/vietfix.h"
 #include "md5.h"
 #include "missing_strings.h"
@@ -1025,7 +1024,7 @@ void WKConverter::copyHDMaps(const fs::path& inputDir,
     }
     terrainOverrides.clear();
   }
-  listener->increaseProgress(1); // 16+20 22?
+  listener->increaseProgress(1);
 }
 
 bool WKConverter::usesMultipleWaterTerrains(const std::string& map,
@@ -2469,11 +2468,8 @@ int WKConverter::run() {
     listener->setInfo("working$\n$workingMods");
     listener->increaseProgress(1); // 7
     if (settings.useGrid) {
-      listener->increaseProgress(1); // 8
-      listener->increaseProgress(2); // 10
     } else {
       indexDrsFiles(newTerrainGraphicsDir, true, true);
-      listener->increaseProgress(3); // 10
     }
     listener->increaseProgress(1); // 11
 
@@ -2530,17 +2526,15 @@ int WKConverter::run() {
                      "random-map-scripts",
                  installMapDir);
     } else {
-      listener->increaseProgress(3); // 18
+      listener->increaseProgress(2); // 18
     }
-    listener->increaseProgress(1); // 19
 
     listener->log("Copy Special Maps");
     if (settings.copyMaps) {
       copyHDMaps(resourceDir / "Script.Rm", installMapDir, true);
     } else {
-      listener->increaseProgress(3);
+      listener->increaseProgress(2);
     }
-    listener->increaseProgress(1); // 23
     cfs::copy(scenarioInputDir, installDir / "Scenario",
               fs::copy_options::recursive | fs::copy_options::update_existing);
 
@@ -2562,13 +2556,13 @@ int WKConverter::run() {
     genie::DatFile hdDat;
     aocDat.setGameVersion(genie::GameVersion::GV_TC);
     aocDat.load(aocDatPath.string().c_str());
-    listener->increaseProgress(3); // 28
+    listener->increaseProgress(2); // 28
 
     listener->setInfo("working$\n$workingHD");
 
     hdDat.setGameVersion(genie::GameVersion::GV_Cysion);
     hdDat.load(hdDatPath.string().c_str());
-    listener->increaseProgress(3); // 31
+    listener->increaseProgress(2); // 31
 
     listener->setInfo("working$\n$workingInterface");
 
@@ -2611,7 +2605,6 @@ int WKConverter::run() {
     if (settings.useShortWalls) // This needs to be AFTER patchArchitectures
       copyWallFiles(wallsInputDir);
 
-    listener->increaseProgress(1); // 64
     // Add monk graphics
     if (settings.useMonks) {
       addNewMonkGraphics(slpFiles, newMonkGraphicsDir);
@@ -2621,7 +2614,6 @@ int WKConverter::run() {
     listener->increaseProgress(1); // 65
 
     convertShipSinkingGraphics(slpFiles, settings, newShipSinkingGraphicsDir);
-    listener->increaseProgress(1); // 66
 
     convertUniqueTechIcons(slpFiles, settings, newUniqueTechIconsDir);
     listener->increaseProgress(1); // 67
@@ -2638,7 +2630,7 @@ int WKConverter::run() {
     listener->log("Opening DRS");
     std::ofstream drsOut(drsOutPath, std::ios::binary);
     listener->log("Make DRS " + drsOutPath.string());
-    makeDrs(drsOut);
+    makeDrs(drsOut);               // TODO Would need more progress calls here
     listener->increaseProgress(1); // 75
 
     listener->log("Make random map scripts DRS");
@@ -2683,7 +2675,6 @@ int WKConverter::run() {
         wololo::smallFixes,
         wololo::cuttingFix,
         wololo::ai900UnitIdFix,
-        wololo::uprootingFix,
         wololo::nomadsFix,
         wololo::slavTeamBonusFix,
         wololo::splitUniqueTechIcons,
@@ -2696,10 +2687,13 @@ int WKConverter::run() {
     listener->setInfo("working$\n$workingPatches");
 
     listener->log("DAT Patches");
+
+    int progress = 0;
     for (auto& patch : patchTab) {
       patch.patch(&aocDat);
       listener->setInfo(std::string("working$\n$") + patch.name);
-      listener->increaseProgress(1); // 77-93
+      listener->increaseProgress(progress); // 77-93
+      progress = progress == 0 ? 1 : 0;
     }
 
     for (auto& civ : aocDat.Civs) {

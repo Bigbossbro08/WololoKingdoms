@@ -99,7 +99,6 @@ set(ALL_SRC
     fixes/smallfixes.cpp
 	fixes/splituniquetechicons.cpp
     fixes/tricklebuildingfix.cpp
-	fixes/uprootingfix.cpp
     fixes/vietfix.cpp
     wkconverter.cpp
     third_party/miniz/miniz.c
