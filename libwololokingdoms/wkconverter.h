@@ -106,12 +106,18 @@ public:
   int retryInstall();
 
 private:
+  //int standardMapsId = 54240;
+  //int specialMapsId = 55011;
+  int rmsStringId = 11070;
+  int rwmStringId = 10930;
+  int smStringId = 10960;
   std::set<char> civLetters;
   std::set<int> aocSlpFiles;
   std::map<int, fs::path> slpFiles;
   std::map<int, fs::path> wavFiles;
+  std::map<int, fs::path> mapFiles;
   std::map<std::string, fs::path> newTerrainFiles;
-  std::vector<std::pair<int, std::string>> rmsCodeStrings;
+  std::map<int, std::string> langReplacement;
   bool secondAttempt = false;
 
   fs::path nfzUpOutPath;
@@ -132,7 +138,7 @@ private:
   };
 
   struct MapConvertData {
-    std::string slp_name;
+    int slp_number;
     std::vector<std::string> const_names;
     std::string replaced_name;
     int old_terrain_id;
@@ -140,25 +146,23 @@ private:
     TerrainType terrain_type;
   };
 
-  void copyHDMaps(const fs::path& inputDir, const fs::path& outputDir,
-                  bool replace = false);
+  void processExpansionMaps(const fs::path& inputDir,
+                            const fs::path& outputDir);
+  void processCustomHDMaps(const fs::path& inputDir, const fs::path& outputDir);
+  void convertExpansionMap(
+      const fs::path& it, const fs::path& outputDir,
+      std::map<int, fs::path>& terrainOverrides);
   bool usesMultipleWaterTerrains(const std::string& map,
                                  std::map<int, bool>& terrainsUsed);
   bool isTerrainUsed(int terrain, std::map<int, bool>& terrainsUsed,
                      const std::string& map,
                      const std::map<int, std::regex>& patterns);
   void upgradeTrees(int usedTerrain, int oldTerrain, std::string& map);
-  void createZRmap(std::map<std::string, fs::path>& terrainOverrides,
+  void createZRmap(std::map<int, fs::path>& terrainOverrides,
                    fs::path outputDir, std::string mapName);
   void terrainSwap(genie::DatFile* hdDat, genie::DatFile* aocDat, int tNew,
                    int tOld, int slpID);
-  void indexDrsFiles(fs::path const& src, bool expansionFiles = true,
-                     bool terrainFiles = false);
-  inline void indexDrsFiles(fs::path const& src, WKSettings::IndexType flags) {
-    indexDrsFiles(
-        src, static_cast<int>(flags & WKSettings::IndexType::Expansion) != 0,
-        static_cast<int>(flags & WKSettings::IndexType::Terrain) != 0);
-  }
+  void indexDrsFiles(fs::path const& src, bool expansionFiles = true);
   void copyHistoryFiles(fs::path inputDir, fs::path outputDir);
   std::pair<int, std::string> parseHDTextLine(std::string line);
   void convertLanguageFile(std::ifstream& in, std::ofstream& iniOut,

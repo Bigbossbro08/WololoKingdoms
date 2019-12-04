@@ -1,0 +1,318 @@
+
+/* The Circle of Greenery 2016 */
+
+#include_drs random_map.def 54000 
+
+<PLAYER_SETUP>
+random_placement
+  ai_info_map_type  OASIS 0 0 0
+
+<LAND_GENERATION>
+
+base_terrain DLC_NEWSHALLOW
+
+create_player_lands
+{
+  terrain_type DLC_JUNGLELEAVES
+  land_percent 1
+  base_size 14
+  border_fuzziness 15
+clumping_factor 15
+     set_zone_by_team
+     other_zone_avoidance_distance 16
+}
+
+create_land
+{
+  terrain_type DLC_NEWSHALLOW
+  land_percent 100
+  base_size 14
+  border_fuzziness 15
+clumping_factor 15
+bottom_border 20
+right_border 20
+top_border 20
+left_border 20
+}
+
+/* *********************************** */
+<TERRAIN_GENERATION>
+
+create_terrain DLC_NEWSHALLOW
+{
+     base_terrain DLC_JUNGLELEAVES
+     land_percent 100
+number_of_clumps 100
+set_avoid_player_start_areas
+}
+
+create_terrain DIRT
+{
+     base_terrain DLC_NEWSHALLOW
+     land_percent 100
+number_of_clumps 100
+spacing_to_other_terrain_types 7
+}
+
+create_terrain DLC_JUNGLELEAVES
+{
+     base_terrain DLC_NEWSHALLOW
+     land_percent 100
+number_of_clumps 100
+}
+
+create_terrain DLC_NEWSHALLOW
+{
+     base_terrain DIRT
+     land_percent 100
+number_of_clumps 100
+}
+
+create_terrain DLC_MANGROVESHALLOW 
+{
+     base_terrain DLC_NEWSHALLOW
+     land_percent 100
+number_of_clumps 100
+spacing_to_other_terrain_types 2
+}
+
+create_terrain DLC_MANGROVEFOREST
+{
+     base_terrain DLC_MANGROVESHALLOW 
+     land_percent 100
+number_of_clumps 100
+spacing_to_other_terrain_types 2
+}
+
+create_terrain DLC_MANGROVESHALLOW 
+{
+base_terrain DLC_MANGROVEFOREST
+land_percent 12
+number_of_clumps 40
+spacing_to_other_terrain_types 5
+set_avoid_player_start_areas
+}
+
+<OBJECTS_GENERATION>
+
+create_object TOWN_CENTER
+{
+  set_place_for_every_player
+  group_placement_radius     18
+  min_distance_to_players    0
+  max_distance_to_players    0
+}
+
+create_object VILLAGER
+{
+  set_place_for_every_player
+  min_distance_to_players       6
+  max_distance_to_players       6
+ }
+
+create_object SCOUT
+{
+  number_of_objects             1
+  set_place_for_every_player
+  min_distance_to_players       7
+  max_distance_to_players       9
+ }
+
+create_object RELIC
+{
+   number_of_objects            999
+   min_distance_to_players     35
+   temp_min_distance_group_placement 95
+}
+
+if REGICIDE
+
+create_object KING
+{
+  set_place_for_every_player
+  min_distance_to_players       6
+  max_distance_to_players       8
+}
+
+create_object WATCH_TOWER
+{
+  set_place_for_every_player
+  min_distance_to_players    8
+  max_distance_to_players    12
+}
+endif
+
+create_object DLC_WATERBUFFALO
+{
+   number_of_objects 4
+   set_loose_grouping
+   set_gaia_object_only
+   set_place_for_every_player
+   min_distance_to_players    4
+   max_distance_to_players    9
+}
+
+create_object DLC_WATERBUFFALO
+{
+   number_of_objects 4
+   set_loose_grouping
+   set_gaia_object_only
+   set_place_for_every_player
+   min_distance_to_players    10
+   max_distance_to_players    13
+}
+
+create_object DLC_RHINO 
+{
+  number_of_objects          2
+  group_placement_radius     3
+  set_loose_grouping
+  set_gaia_object_only
+  set_place_for_every_player
+  min_distance_to_players    7
+  max_distance_to_players    13
+}
+
+create_object DLC_RAINTREE
+{
+  number_of_objects  16
+  group_placement_radius 2
+  set_tight_grouping
+  set_gaia_object_only
+  set_place_for_every_player
+  min_distance_to_players       10
+  max_distance_to_players       13
+  min_distance_group_placement  3
+}
+
+create_object GOLD
+{
+  number_of_objects          4
+  group_placement_radius     3
+  set_tight_grouping
+  set_gaia_object_only
+  set_place_for_every_player
+  min_distance_to_players    6
+  max_distance_to_players    12
+  temp_min_distance_group_placement  5
+}
+
+create_object GOLD
+{
+  number_of_objects          4
+  group_placement_radius     3
+  set_tight_grouping
+  set_gaia_object_only
+  set_place_for_every_player
+  min_distance_to_players    6
+  max_distance_to_players    12
+  temp_min_distance_group_placement  5
+}
+
+create_object STONE
+{
+  number_of_objects          4
+  group_placement_radius     3
+  set_tight_grouping
+  set_gaia_object_only
+  set_place_for_every_player
+  min_distance_to_players    6
+  max_distance_to_players    12
+  temp_min_distance_group_placement  5
+}
+
+create_object DEER
+{
+  number_of_objects          4
+number_of_groups 2
+  group_placement_radius     3
+  set_tight_grouping
+  set_gaia_object_only
+  set_place_for_every_player
+  min_distance_to_players    7
+  max_distance_to_players    12
+  temp_min_distance_group_placement  6
+}
+
+/* DISTANT GOLD AND STONE */
+
+create_object GOLD
+{
+  number_of_groups 500
+  number_of_objects 4
+  group_placement_radius 2
+  set_tight_grouping
+  set_gaia_object_only
+  temp_min_distance_group_placement 16
+  max_distance_to_other_zones 3
+min_distance_to_players    3
+terrain_to_place_on DLC_MANGROVESHALLOW 
+}
+
+create_object STONE
+{
+  number_of_groups 500
+  number_of_objects 3
+  group_placement_radius 2
+  set_tight_grouping
+  set_gaia_object_only
+  temp_min_distance_group_placement 16
+  max_distance_to_other_zones 3
+min_distance_to_players    30
+terrain_to_place_on DLC_MANGROVESHALLOW 
+}
+
+create_object DLC_RAINTREE
+{
+  number_of_objects             2
+  set_gaia_object_only
+  set_place_for_every_player
+  min_distance_to_players       4
+  max_distance_to_players       5
+  min_distance_group_placement  2
+}
+
+create_object DLC_RAINTREE
+{
+  number_of_objects             3
+  set_gaia_object_only
+  set_place_for_every_player
+  min_distance_to_players       6
+  max_distance_to_players       8
+  min_distance_group_placement  2
+}
+
+create_object MACAW
+{
+   number_of_objects         4
+   set_scaling_to_map_size
+}
+
+create_object DLC_TIGER 
+{
+     number_of_groups 30
+     set_loose_grouping
+        number_of_objects 1
+     set_gaia_object_only
+     temp_min_distance_group_placement 60
+     min_distance_to_players 32
+}
+
+
+/* ****************************************************** */
+
+<ELEVATION_GENERATION>
+<CONNECTION_GENERATION>
+
+create_connect_all_players_land
+{
+  replace_terrain DLC_MANGROVEFOREST DLC_NEWSHALLOW
+  replace_terrain DLC_MANGROVESHALLOW DLC_NEWSHALLOW
+  replace_terrain DLC_JUNGLEGRASS DLC_NEWSHALLOW
+  terrain_cost DLC_MANGROVEFOREST 4
+  terrain_cost DLC_JUNGLEGRASS 4
+  terrain_cost DLC_MANGROVESHALLOW 4
+  terrain_size DLC_MANGROVEFOREST 3 0
+  terrain_size DLC_MANGROVESHALLOW 3 0
+  terrain_size DLC_JUNGLEGRASS 3 0
+}

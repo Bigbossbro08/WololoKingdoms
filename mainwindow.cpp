@@ -206,6 +206,7 @@ void MainWindow::runConverter() {
   settings.resourceDir = resourceDir;
 
   auto visualModsDir = resourceDir / "visual-mods";
+  settings.addDrsResources(visualModsDir / "small-trees");
   if (this->ui->useSmallTrees->isChecked()) {
     settings.addDrsResources(visualModsDir / "small-trees");
   }
@@ -214,9 +215,7 @@ void MainWindow::runConverter() {
   }
   if (this->ui->useGrid->isChecked()) {
     settings.addDrsResources(visualModsDir / "grid-terrains");
-    settings.addDrsResources(visualModsDir / "new-grid-terrains",
-                             WKSettings::IndexType::Expansion |
-                                 WKSettings::IndexType::Terrain);
+    settings.addDrsResources(visualModsDir / "new-grid-terrains");
     if (this->ui->useNoSnow->isChecked()) {
       settings.addDrsResources(visualModsDir / "grid-no-snow");
     }
@@ -231,9 +230,7 @@ void MainWindow::runConverter() {
 
   auto terrainOverrideDir = resourceDir.parent_path() / "new_terrain_override";
   if (cfs::exists(terrainOverrideDir) && !cfs::is_empty(terrainOverrideDir)) {
-    settings.addDrsResources(terrainOverrideDir,
-                             WKSettings::IndexType::Expansion |
-                                 WKSettings::IndexType::Terrain);
+    settings.addDrsResources(terrainOverrideDir);
   }
 
   auto modOverrideDir = resourceDir.parent_path() / "mod_override";
