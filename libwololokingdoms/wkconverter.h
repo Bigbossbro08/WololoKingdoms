@@ -116,6 +116,7 @@ private:
   std::map<int, fs::path> slpFiles;
   std::map<int, fs::path> wavFiles;
   std::map<int, fs::path> mapFiles;
+  std::map<std::string, fs::path> unconvertedMapFiles;
   std::map<std::string, fs::path> newTerrainFiles;
   std::map<int, std::string> langReplacement;
   bool secondAttempt = false;
@@ -146,11 +147,10 @@ private:
     TerrainType terrain_type;
   };
 
-  void processExpansionMaps(const fs::path& inputDir,
-                            const fs::path& outputDir);
+  void processExpansionMaps(const fs::path& outputDir);
   void processCustomHDMaps(const fs::path& inputDir, const fs::path& outputDir);
   void convertExpansionMap(
-      const fs::path& it, const fs::path& outputDir,
+      std::string& map,
       std::map<int, fs::path>& terrainOverrides);
   bool usesMultipleWaterTerrains(const std::string& map,
                                  std::map<int, bool>& terrainsUsed);

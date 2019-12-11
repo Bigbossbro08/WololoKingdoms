@@ -97,9 +97,9 @@ void WKConverter::indexDrsFiles(fs::path const& src, bool expansionFiles) {
     } else if (extension == ".wav") {
       int id = atoi(src.stem().string().c_str());
       wavFiles[id] = src;
-    } else if (extension == ".rms" || extension == ".scx") {
-      int id = atoi(src.stem().string().c_str());
-      mapFiles[id] = src;
+    } else if (extension == ".rms" || extension == ".rms2" ||
+               extension == ".inc") {
+      unconvertedMapFiles[src.filename().string()] = src;
     }
   }
 }
@@ -736,75 +736,117 @@ void WKConverter::createMusicPlaylist(const fs::path& inputDir,
   outputFile.close();
 }
 
-void WKConverter::processExpansionMaps(const fs::path& inputDir,
-                                       const fs::path& outputDir) {
-  std::map<int, std::string> internalMapNames = {
-      {54240, "acropolis"},
-      {54241, "budapest"},
-      {54242, "cenotes"},
-      {54243, "city-of-lakes"},
-      {54244, "golden-pit"},
-      {54245, "hideout"},
-      {54246, "hill-fort"},
-      {54247, "lombardia"},
-      {54248, "steppe"},
-      {54249, "valley"},
-      {54250, "megarandom"},
-      {54251, "hamburger"},
-      {54252, "ctr-random"},
-      {54253, "ctr-monsoon"},
-      {54254, "ctr-pyramid-descent"},
-      {54255, "ctr-spiral"},
-      //ak+ maps
-      {54256, "kilimanjaro"},
-      {54257, "mountain-pass"},
-      {54258, "nile-delta"},
-      {54259, "serengeti"},
-      {54260, "socotra"},
-      {54261, "bog-islands"},
-      {54262, "mangrove-jungle"},
-      {54263, "pacific-islands"},
-      {54264, "sandbank"},
-      {54265, "water-nomad"},
-      // real world maps
-      {55011, "rwm-amazon"},
-      {55012, "rwm-bohemia"},
-      {55013, "rwm-china"},
-      {55014, "rwm-eastafrica"},
-      {55015, "rwm-india"},
-      {55016, "rwm-madagascar"},
-      {55017, "rwm-australia"},
-      {55018, "rwm-indochina"},
-      {55019, "rwm-indonesia"},
-      {55020, "rwm-malacca"},
-      {55021, "rwm-philippines"},
-      // special maps
-      {55030, "sm-canyons"},
-      {55031, "sm-enemyarchipelago"},
-      {55032, "sm-enemyislands"},
-      {55033, "sm-farout"},
-      {55034, "sm-frontline"},
-      {55035, "sm-innercircle"},
-      {55036, "sm-motherland"},
-      {55037, "sm-openplains"},
-      {55038, "sm-ringofwater"},
-      {55039, "sm-snakepit"},
-      {55040, "sm-theeye"},
-      {55041, "sm-jungleislands"},
-      {55042, "sm-holyline"},
-      {55043, "sm-borderstones"},
-      {55044, "sm-yinyang"},
-      {55045, "sm-junglelanes"},
+void WKConverter::processExpansionMaps(const fs::path& outputDir) {
+  std::vector<std::tuple<std::string, int, std::string, int, int>>
+      internalMapNames = {
+    // random map includes
+    {"land_resources.inc", 54103, "", 0, 0},
+    {"land_and_water_resources.inc", 54102, "", 0, 0},
+    {"std_resources.inc", 54101, "", 0, 0},
+    // {"random_map.def", 54000, ""}, We ship a modified version
+    //aoc maps
+    {"Arabia.rms", 54201, "", 0, 0},
+    {"Archipelago.rms", 54202, "", 0, 0},
+    {"Baltic.rms", 54203, "", 0, 0},
+    {"Black_Forest.rms", 54204, "", 0, 0},
+    {"Coastal.rms", 54205, "", 0, 0},
+    {"Continental.rms", 54206, "", 0, 0},
+    {"Crater_Lake.rms", 54207, "", 0, 0},
+    {"Fortress.rms", 54208, "", 0, 0},
+    {"Gold_Rush.rms", 54209, "", 0, 0},
+    {"Highland.rms", 54210, "", 0, 0},
+    {"Islands.rms", 54211, "", 0, 0},
+    {"Mediterranean.rms", 54212, "", 0, 0},
+    {"Migration.rms", 54213, "", 0, 0},
+    {"Rivers.rms", 54217, "", 0, 0},
+    {"Team_Islands.rms", 54218, "", 0, 0},
+    {"Scandanavia.rms", 54219, "", 0, 0}, // Typo as in the HD edition, do not fix
+    {"Mongolia.rms", 54220, "", 0, 0},
+    {"Yucatan.rms", 54221, "", 0, 0},
+    {"Salt_Marsh.rms", 54222, "", 0, 0},
+    {"Arena.rms", 54223, "", 0, 0},
+    {"Oasis.rms", 54225, "", 0, 0},
+    {"Ghost_Lake.rms", 54226, "", 0, 0},
+    {"nomad.rms", 54227, "", 0, 0},
+    {"Blind_Random.rms", 54228, "", 0, 0},
+    //aoc real world
+    {"real_world_britain.rms", 55001, "", 0, 0},
+    {"real_world_byzantium.rms", 55002, "", 0, 0},
+    {"real_world_caribbean.rms", 55003, "", 0, 0},
+    {"real_world_france.rms", 55004, "", 0, 0},
+    {"real_world_italy.rms", 55005, "", 0, 0},
+    {"real_world_jutland.rms", 55006, "", 0, 0},
+    {"real_world_mideast.rms", 55007, "", 0, 0},
+    {"real_world_nippon.rms", 55008, "", 0, 0},
+    {"real_world_spain.rms", 55009, "", 0, 0},
+    {"real_world_texas.rms", 55010, "", 0, 0},
+    // forgotten maps
+    {"acropolis.rms2", 54240, "acropolis", 10914, 30146},
+    {"budapest.rms2", 54241, "budapest", 10915, 30158},
+    {"cenotes.rms2", 54242, "cenotes", 10916, 30148},
+    {"cityoflakes.rms2", 54243, "city-of-lakes", 10917, 30149},
+    {"goldenpit.rms2", 54244, "golden-pit", 10918, 30150},
+    {"hideout.rms2", 54245, "hideout", 10919, 30151},
+    {"hillfort.rms2", 54246, "hillfort", 10920, 30152},
+    {"lombardia.rms2", 54247, "lombardia", 10921, 30153},
+    {"steppe.rms2", 54248, "steppe", 10922, 30154},
+    {"valley.rms2", 54249, "valley", 10923, 30155},
+    {"Megarandom.rms2", 54250, "megarandom", 10924, 30156},
+    {"hamburger.rms2", 54251, "hamburger", 10925, 30157},
+    {"CtR Random.rms2", 54252, "ctr-random", 10926, 30159},
+    {"CtR Monsoon.rms2", 54253, "ctr-monsoon", 10927, 30160},
+    {"CtR Pyramid Descent.rms2", 54254, "ctr-pyramid-descent", 10928, 30161},
+    {"CtR Spiral.rms2", 54255, "ctr-spiral", 10929, 30162},
+    // ak+ maps
+    {"Kilimanjaro.rms", 54256, "kilimanjaro", 11070, 11071},
+    {"Mountain Pass.rms", 54257, "mountain-pass", 11072, 11073},
+    {"Nile Delta.rms", 54258, "nile-delta", 11074, 11075},
+    {"Serengeti.rms", 54259, "serengeti", 11076, 11077},
+    {"Socotra.rms", 54260, "socotra", 11078, 11079},
+    {"Bog_Islands.rms", 54261, "bog-islands", 11080, 11081},
+    {"Mangrove_Jungle.rms", 54262, "mangrove-jungle", 11082, 11083},
+    {"Pacific_Islands.rms", 54263, "pacific-islands", 11084, 11085},
+    {"Sandbank.rms", 54264, "sandbank", 11086, 11087},
+    {"Water_Nomad.rms", 54265, "water-nomad", 11088, 11089},
+    // real world maps
+    {"real_world_amazon.rms", 55011, "rwm-amazon", 10930, 10931},
+    {"real_world_china.rms", 55013, "rwm-china", 10932, 10933},
+    {"real_world_eastafrica.rms", 55014, "rwm-eastafrica", 10934, 10935},
+    {"real_world_india.rms", 55015, "rwm-india", 10936, 10937},
+    {"real_world_madagascar.rms", 55016, "rwm-madagascar", 10938, 10939},
+    {"real_world_bohemia.rms", 55012, "rwm-bohemia", 10942, 10933},
+    {"real_world_australia.rms", 55017, "rwm-australia", 10948, 10949},
+    {"real_world_indochina.rms", 55018, "rwm-indochina", 10950, 10951},
+    {"real_world_indonesia.rms", 55019, "rwm-indonesia", 10952, 10953},
+    {"real_world_malacca.rms", 55020, "rwm-malacca", 10954, 10955},
+    {"real_world_philippines.rms", 55021, "rwm-philippines", 10956, 10957},
+    // special maps
+    {"special_map_canyons.rms", 55030, "sm-canyons", 10962, 10963},
+    {"special_map_enemyarchipelago.rms", 55031, "sm-enemyarchipelago", 10964, 10965},
+    {"special_map_enemyislands.rms", 55032, "sm-enemyislands", 10966, 10967},
+    {"special_map_farout.rms", 55033, "sm-farout", 10968, 10969},
+    {"special_map_frontline.rms", 55034, "sm-frontline", 10970, 10971},
+    {"special_map_innercircle.rms", 55035, "sm-innercircle", 10972, 10973},
+    {"special_map_motherland.rms", 55036, "sm-motherland", 10974, 10975},
+    {"special_map_openplains.rms", 55037, "sm-openplains", 10976, 10977},
+    {"special_map_ringofwater.rms", 55038, "sm-ringofwater", 10978, 10979},
+    {"special_map_snakepit.rms", 55039, "sm-snakepit", 10980, 10981},
+    {"special_map_theeye.rms", 55040, "sm-theeye", 10982, 10983},
+    {"special_map_jungleislands.rms", 55041, "sm-jungleislands", 10986, 10987},
+    {"special_map_holyline.rms", 55042, "sm-holyline", 10988, 10989},
+    {"special_map_borderstones.rms", 55043, "sm-borderstones", 10990, 10991},
+    {"special_map_yinyang.rms", 55044, "sm-yinyang", 10992, 10993},
+    {"special_map_junglelanes.rms", 55045, "sm-junglelanes", 10994, 10995},
   };
 
   // Find all maps to be converted
-  std::vector<fs::path> mapNames;
-  for (const auto& it : fs::directory_iterator(resolve_path(inputDir))) {
-    auto extension = it.path().extension();
-    if (extension == ".rms") {
-      mapNames.push_back(it.path());
-    }
-  }
+  // std::vector<fs::path> mapNames;
+  // for (const auto& it : fs::directory_iterator(resolve_path(inputDir))) {
+  //  auto extension = it.path().extension();
+  //  if (extension == ".rms") {
+  //    mapNames.push_back(it.path());
+  //  }
+  //}
   listener->increaseProgress(1); // 15+19
   std::map<int, fs::path> terrainOverrides;
   std::ofstream xml =
@@ -813,34 +855,48 @@ void WKConverter::processExpansionMaps(const fs::path& inputDir,
           : std::ofstream(settings.vooblyDir / "aoc-builtin-rms.xml");
 
   int mapId = -1;
-  int mapNameId = 10914;
-  int descriptionId = 30146; // TODO Does Blind Random need to be skipped?
-  bool finishedForgottenMaps = false;
   bool finishedStandardMaps = false;
   bool finishedRealWorldMaps = false;
 
   xml << "<?xml version=\"1.0\" encoding=\"utf-8\"?>" << std::endl;
   xml << "<random-maps>" << std::endl;
   xml << "  <standard>" << std::endl;
+  // We can't handle ludakris rwm, have to get rid of them unfortunately
+  // unconvertedMapFiles.erase("real_world_westafrica.rms");
+  // unconvertedMapFiles.erase("real_world_world.rms");
   // Main Loop, Iterate through the maps to be converted
-  for (auto& it : mapNames) {
-    auto id = std::atoi(it.stem().c_str());
-    convertExpansionMap(it, outputDir, terrainOverrides);
-    if (id > 54255 && !finishedForgottenMaps) {
-      finishedForgottenMaps = true;
-      mapNameId = 11070;
-      descriptionId = mapNameId + 1;
+  for (auto const& mapData : internalMapNames) {
+    int id;
+    std::string aiMapName;
+    std::string mapName;
+    int mapNameId;
+    int descriptionId;
+    std::tie(mapName, id, aiMapName, mapNameId, descriptionId) = mapData;
+    std::ifstream input(unconvertedMapFiles[mapName]);
+    std::string map = concat_stream(input);
+    input.close();
+    bool isAocMap = id < 54240 || (id > 55000 && id < 55011);
+    if (isAocMap) {
+      map = std::regex_replace(
+          map,
+          std::regex("/\\* Note: random_map\\.def is automatically included in "
+                     "every rms script \\*/"),
+          "#include_drs random_map.def 54000");
+    } else {
+      convertExpansionMap(map, terrainOverrides);
+    }   
+    std::ofstream out(outputDir / (std::to_string(id)+".rms"));
+    out << map;
+    out.close();
+    if (isAocMap) {
+      continue;
     }
     if (id > 55000 && !finishedStandardMaps) {
       xml << "  </standard>" << std::endl;
       xml << "  <real-world>" << std::endl;
       finishedStandardMaps = true;
-      mapNameId = 10930;
-      descriptionId = mapNameId + 1;
     }
-    if (id > 55030 && !finishedRealWorldMaps) {
-      mapNameId = 10962;
-      descriptionId = mapNameId + 1;
+    if (id >= 55030 && !finishedRealWorldMaps) {
       xml << "  </real-world>" << std::endl;
       xml << R"(  <section name="10960" aiSymbolPrefix="SPECIAL-MAP" aiConstPrefix="special-map">)"
           << std::endl;
@@ -850,8 +906,8 @@ void WKConverter::processExpansionMaps(const fs::path& inputDir,
     sprintf(
         buffer,
         R"(    <map id="%i" name="%s" string="%i" drsId="%i" description="%i")",
-        mapId--, internalMapNames[id].c_str(), mapNameId, id, descriptionId++);
-    mapNameId++;
+        mapId--, aiMapName.c_str(), mapNameId, id,
+        descriptionId);
     xml << buffer;
     if (terrainOverrides.size() != 0) {
       xml << " terrainOverrides=\"";
@@ -864,10 +920,6 @@ void WKConverter::processExpansionMaps(const fs::path& inputDir,
       }
       xml << "\"";
     }
-    if (id > 54255) { // From AK on, map and map descriptions alternate, so we need to add +1 again for each
-      mapNameId++;
-      descriptionId++;
-    }
     if (id > 55000) {
       xml << " scxDrsId=\"" << id + 1000 << "\"";
     }
@@ -879,13 +931,14 @@ void WKConverter::processExpansionMaps(const fs::path& inputDir,
   xml.close();
   if (settings.useBoth) {
     cfs::copy_file(settings.vooblyDir / "aoc-builtin-rms.xml",
-                   settings.upDir / "aoc-builtin-rms.xml", cfs::copy_options::overwrite_existing);
+                   settings.upDir / "aoc-builtin-rms.xml",
+                   cfs::copy_options::overwrite_existing);
   }
   listener->increaseProgress(1);
 }
 
 void WKConverter::convertExpansionMap(
-    const fs::path& it, const fs::path& outputDir,
+    std::string& map,
     std::map<int, fs::path>& terrainOverrides) {
 
   static const std::vector<MapConvertData> replacements = {
@@ -903,49 +956,14 @@ void WKConverter::convertExpansionMap(
        50,
        41,
        None},
-      {15041,
-       {"DLC_RAINFOREST"},
-       "DLC_RAINFOREST",
-       56,
-       10,
-       ForestTerrain},
-      {15025,
-       {"BAOBABS", "BAOBAB_FOREST"},
-       "BAOBAB_FOREST",
-       49,
-       16,
-       None},
-      {15012,
-       {"DLC_MANGROVESHALLOW"},
-       "DLC_MANGROVESHALLOW",
-       54,
-       11,
-       None},
-      {15012,
-       {"DLC_MANGROVEFOREST"},
-       "DLC_MANGROVEFOREST",
-       55,
-       20,
-       None},
-      {15043,
-       {"DLC_NEWSHALLOW"},
-       "DLC_NEWSHALLOW",
-       59,
-       4,
-       FixedTerrain},
-      {15013,
-       {"SAVANNAH", "DLC_SAVANNAH"},
-       "SAVANNAH",
-       41,
-       14,
-       LandTerrain},
+      {15041, {"DLC_RAINFOREST"}, "DLC_RAINFOREST", 56, 10, ForestTerrain},
+      {15025, {"BAOBABS", "BAOBAB_FOREST"}, "BAOBAB_FOREST", 49, 16, None},
+      {15012, {"DLC_MANGROVESHALLOW"}, "DLC_MANGROVESHALLOW", 54, 11, None},
+      {15012, {"DLC_MANGROVEFOREST"}, "DLC_MANGROVEFOREST", 55, 20, None},
+      {15043, {"DLC_NEWSHALLOW"}, "DLC_NEWSHALLOW", 59, 4, FixedTerrain},
+      {15013, {"SAVANNAH", "DLC_SAVANNAH"}, "SAVANNAH", 41, 14, LandTerrain},
       {15025, {"DIRT4", "DLC_DIRT4"}, "DIRT4", 42, 3, LandTerrain},
-      {15047,
-       {"DLC_MOORLAND", "MOORLAND"},
-       "DLC_MOORLAND",
-       44,
-       9,
-       LandTerrain},
+      {15047, {"DLC_MOORLAND", "MOORLAND"}, "DLC_MOORLAND", 44, 9, LandTerrain},
       {15032, {"CRACKEDIT"}, "CRACKEDIT", 45, 38, None},
       {15048,
        {"QUICKSAND", "DLC_QUICKSAND"},
@@ -960,33 +978,15 @@ void WKConverter::convertExpansionMap(
       {15039, {"DLC_DRYROAD"}, "DLC_DRYROAD", 43, 25, LandTerrain},
       {15045, {"DLC_WATER4"}, "DLC_WATER4", 57, 22, WaterTerrain},
       {15046, {"DLC_WATER5"}, "DLC_WATER5", 58, 1, WaterTerrain},
-      {15041,
-       {"DLC_JUNGLELEAVES"},
-       "DLC_JUNGLELEAVES",
-       62,
-       5,
-       LandTerrain},
-      {15042,
-       {"DLC_JUNGLEROAD"},
-       "DLC_JUNGLEROAD",
-       61,
-       39,
-       LandTerrain},
-      {15040,
-       {"DLC_JUNGLEGRASS"},
-       "DLC_JUNGLEGRASS",
-       60,
-       12,
-       LandTerrain}};
+      {15041, {"DLC_JUNGLELEAVES"}, "DLC_JUNGLELEAVES", 62, 5, LandTerrain},
+      {15042, {"DLC_JUNGLEROAD"}, "DLC_JUNGLEROAD", 61, 39, LandTerrain},
+      {15040, {"DLC_JUNGLEGRASS"}, "DLC_JUNGLEGRASS", 60, 12, LandTerrain}};
 
   static const std::map<int, int> slpNumbers = {
-      {0, 15001},  {1, 15002},  {2, 15017},
-      {3, 15007},  {4, 15014},  {5, 15011},
-      {6, 15014},  {9, 15009},  {10, 15011},
-      {12, 15008}, {13, 15010}, {14, 15010},
-      {21, 15029}, {22, 15015}, {23, 15016},
-      {24, 15018}, {25, 15019}, {35, 15024},
-      {39, 15031}, {40, 15033}};
+      {0, 15001},  {1, 15002},  {2, 15017},  {3, 15007},  {4, 15014},
+      {5, 15011},  {6, 15014},  {9, 15009},  {10, 15011}, {12, 15008},
+      {13, 15010}, {14, 15010}, {21, 15029}, {22, 15015}, {23, 15016},
+      {24, 15018}, {25, 15019}, {35, 15024}, {39, 15031}, {40, 15033}};
 
   static const std::array<std::map<int, std::regex>, 6> terrainsPerType = {
       {// The Order is important, see the TerrainTypes Enum!
@@ -1008,10 +1008,6 @@ void WKConverter::convertExpansionMap(
         {21, std::regex("\\WSNOW_FOREST\\W")}},
        {{40, std::regex("\\WDLC_ROCK\\W")}, {35, std::regex("\\WICE\\W")}}}};
 
-  std::ifstream input(it);
-  std::string map = concat_stream(input);
-  input.close();
-
   std::map<int, bool> terrainsUsed = {
       {0, false},  {1, false},  {2, false},  {3, false},  {4, false},
       {5, false},  {6, false},  {9, false},  {10, false}, {11, false},
@@ -1025,6 +1021,11 @@ void WKConverter::convertExpansionMap(
       {56, false}, {57, false}, {58, false}, {59, false}, {60, false},
       {61, false}, {62, false}};
 
+  map = std::regex_replace(
+      map,
+      std::regex("/\\* Note: random_map\\.def is automatically included in "
+                 "every rms script \\*/"),
+      "#include_drs random_map.def 54000");
   /*
    * Search for specific constant names in the map.
    * Some constants have multiple spellings, which is why const_names is a
@@ -1131,9 +1132,6 @@ void WKConverter::convertExpansionMap(
     terrainOverrides[15022] = slpFiles.at(15053);
     terrainOverrides[15023] = slpFiles.at(15054);
   }
-  std::ofstream out(outputDir / it.filename());
-  out << map;
-  out.close();
 }
 
 void WKConverter::processCustomHDMaps(const fs::path& inputDir,
@@ -1160,7 +1158,13 @@ void WKConverter::processCustomHDMaps(const fs::path& inputDir,
       continue;
     }
 
-    convertExpansionMap(it, outputDir, terrainOverrides);
+    std::ifstream input(it);
+    std::string map = concat_stream(input);
+    input.close();
+    convertExpansionMap(map, terrainOverrides);
+    std::ofstream out(outputDir / it.filename());
+    out << map;
+    out.close();
 
     if (terrainOverrides.size() != 0) {
       createZRmap(terrainOverrides, outputDir, mapName);
@@ -1262,7 +1266,7 @@ void WKConverter::createZRmap(std::map<int, fs::path>& terrainOverrides,
   map.addFile(mapName, file_stream);
   for (auto& [terrainId, path] : terrainOverrides) {
     std::ifstream file_stream(path, std::ios_base::in | std::ios_base::binary);
-    map.addFile(std::to_string(terrainId)+".slp", file_stream);
+    map.addFile(std::to_string(terrainId) + ".slp", file_stream);
   }
   map.end();
   outstream.close();
@@ -2474,7 +2478,6 @@ int WKConverter::run() {
   int ret = 0;
   slpFiles.clear();
   wavFiles.clear();
-  mapFiles.clear();
   slpFiles.clear();
 
   // Installer Resources
@@ -2664,7 +2667,7 @@ int WKConverter::run() {
 
     listener->log("Copy Special Maps");
     if (settings.copyMaps) {
-      processExpansionMaps(resourceDir / "gamedata_x1", installMapDir);
+      processExpansionMaps(resourceDir / "gamedata_x1");
     } else {
       listener->increaseProgress(2);
     }
