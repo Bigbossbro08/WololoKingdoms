@@ -879,8 +879,8 @@ void WKConverter::processExpansionMaps(const fs::path& outputDir) {
     if (isAocMap) {
       map = std::regex_replace(
           map,
-          std::regex("/\\* Note: random_map\\.def is automatically included in "
-                     "every rms script \\*/"),
+          std::regex("(#include_drs random_map.def(?! 54000))|(/\\* Note: random_map\\.def is automatically included in "
+                     "every rms script \\*/)"),
           "#include_drs random_map.def 54000");
     } else {
       convertExpansionMap(map, terrainOverrides);
@@ -1021,11 +1021,11 @@ void WKConverter::convertExpansionMap(
       {56, false}, {57, false}, {58, false}, {59, false}, {60, false},
       {61, false}, {62, false}};
 
-  map = std::regex_replace(
-      map,
-      std::regex("/\\* Note: random_map\\.def is automatically included in "
-                 "every rms script \\*/"),
-      "#include_drs random_map.def 54000");
+   map = std::regex_replace(
+          map,
+          std::regex("(#include_drs random_map.def(?! 54000))|(/\\* Note: random_map\\.def is automatically included in "
+                     "every rms script \\*/)"),
+          "#include_drs random_map.def 54000");
   /*
    * Search for specific constant names in the map.
    * Some constants have multiple spellings, which is why const_names is a
