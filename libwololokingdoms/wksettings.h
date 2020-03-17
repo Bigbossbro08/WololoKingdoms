@@ -11,12 +11,6 @@ public:
   typedef std::tuple<std::string, std::string, std::string, int, std::string>
       DataMod;
 
-  enum class IndexType {
-    IndexOnly = 0,
-    Expansion = 1,
-    Terrain = 2,
-  };
-
   WKSettings() = default;
 
   bool useVoobly = true;
@@ -47,21 +41,9 @@ public:
   std::string modName;
   std::string baseModName;
 
-  std::vector<std::pair<fs::path, IndexType>> drsModDirectories;
+  std::vector<fs::path> drsModDirectories;
 
-  inline void addDrsResources(const fs::path& directory,
-                              IndexType type = IndexType::Expansion) {
-    drsModDirectories.push_back(std::make_pair(directory, type));
+  inline void addDrsResources(const fs::path& directory) {
+    drsModDirectories.push_back(directory);
   }
 };
-
-inline WKSettings::IndexType operator|(WKSettings::IndexType a,
-                                       WKSettings::IndexType b) {
-  return static_cast<WKSettings::IndexType>(static_cast<int>(a) |
-                                            static_cast<int>(b));
-}
-inline WKSettings::IndexType operator&(WKSettings::IndexType a,
-                                       WKSettings::IndexType b) {
-  return static_cast<WKSettings::IndexType>(static_cast<int>(a) &
-                                            static_cast<int>(b));
-}

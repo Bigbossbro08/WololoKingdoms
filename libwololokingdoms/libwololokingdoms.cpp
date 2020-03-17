@@ -45,8 +45,7 @@ void wksettings_mod_name(wksettings_t, const path_char_t* name);
 // Add mods.
 void wksettings_data_mod(wksettings_t, const char* name, const char* exe,
                          const char* version, int flags, const char* exe2);
-void wksettings_drs_resources(wksettings_t, const path_char_t* dir,
-                              WKSettings::IndexType type);
+void wksettings_drs_resources(wksettings_t, const path_char_t* dir);
 
 // Converter setup.
 wkconverter_t wkconverter_create(wksettings_t settings, void* context);
@@ -204,10 +203,9 @@ extern "C" void wksettings_data_mod(wksettings_t inst, const char* name,
 }
 
 extern "C" void wksettings_drs_resources(wksettings_t inst,
-                                         const path_char_t* dir,
-                                         WKSettings::IndexType type) {
+                                         const path_char_t* dir) {
   fs::path dir_path = dir;
-  inst->addDrsResources(dir_path, type);
+  inst->addDrsResources(dir_path);
 }
 
 extern "C" wkconverter_t wkconverter_create(wksettings_t settings,
